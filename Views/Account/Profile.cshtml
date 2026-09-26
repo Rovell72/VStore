@@ -1,0 +1,40 @@
+@model ProfileViewModel
+@{
+    ViewData["Title"] = "Профиль";
+}
+<div class="profile-head panel">
+    <div class="avatar big">@Model.User.Nickname[0]</div>
+    <div>
+        <h1>@Model.User.Nickname</h1>
+        <div class="muted">Уровень @Model.Level</div>
+    </div>
+    <div class="stats">
+        <div><b>@Model.Library.Count</b><span class="muted small">Игры</span></div>
+        <div><b>@Model.Unlocked.Count</b><span class="muted small">Достижения</span></div>
+    </div>
+</div>
+
+<h2>Достижения <a class="small green" asp-action="Achievements">Показать все</a></h2>
+<div class="ach-strip">
+    @foreach (var a in Model.Unlocked.Take(8))
+    {
+        <div class="ach-card">
+            <div class="ach-icon">@a.Icon</div>
+            <b>@a.Title</b>
+            <div class="muted small">@a.Game.Title</div>
+        </div>
+    }
+    @if (Model.Unlocked.Count == 0) { <p class="muted">Пока нет достижений.</p> }
+</div>
+
+<h2>Коллекция игр</h2>
+<div class="grid grid-2">
+    @foreach (var l in Model.Library)
+    {
+        <a class="lib" asp-controller="Home" asp-action="Game" asp-route-id="@l.GameId" style="background:linear-gradient(135deg,@(l.Game.ColorFrom),@(l.Game.ColorTo))">
+            <b>@l.Game.Title</b>
+            <span class="small">Наиграно: @l.HoursPlayed.ToString("0.0") ч.</span>
+        </a>
+    }
+    @if (Model.Library.Count == 0) { <p class="muted">Библиотека пуста. Загляните в <a class="green" asp-controller="Home" asp-action="Index">магазин</a>.</p> }
+</div>

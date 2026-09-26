@@ -1,0 +1,18 @@
+@model List<NewsItem>
+@{
+    ViewData["Title"] = "Новости";
+}
+<h1>Актуальные новости</h1>
+<div class="news">
+    @foreach (var n in Model)
+    {
+        <article class="news-item">
+            <div class="news-img" style="background:linear-gradient(135deg,@(n.ColorFrom),@(n.ColorTo))"></div>
+            <div>
+                <div class="muted small">@n.PublishedAt.ToString("dd.MM.yyyy")</div>
+                <h3>@n.Title</h3>
+                <p class="muted">@n.Text</p>
+            </div>
+        </article>
+    }
+</div>

@@ -1,0 +1,16 @@
+@model Game
+<a class="card" asp-controller="Home" asp-action="Game" asp-route-id="@Model.Id">
+    <div class="cover" style="background:linear-gradient(135deg,@(Model.ColorFrom),@(Model.ColorTo))"><span>@Model.Title</span></div>
+    <div class="card-body">
+        <div class="card-title">@Model.Title</div>
+        <div class="muted small">@Model.Genre</div>
+        <div class="price-row">
+            @if (Model.DiscountPercent > 0)
+            {
+                <span class="badge">-@(Model.DiscountPercent)%</span>
+                <s class="muted small">@Model.Price.Money()</s>
+            }
+            <b>@Model.FinalPrice.Money()</b>
+        </div>
+    </div>
+</a>

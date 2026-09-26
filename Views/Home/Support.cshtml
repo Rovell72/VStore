@@ -1,0 +1,21 @@
+@model List<FaqItem>
+@{
+    ViewData["Title"] = "Поддержка";
+}
+<div class="narrow">
+    <h1>Поддержка</h1>
+    <input id="faq-search" class="input" type="text" placeholder="Найти помощь" />
+    <div class="faq">
+        @foreach (var f in Model)
+        {
+            <div class="faq-item">
+                <button type="button" class="faq-q"><span>@f.Question</span><span class="arrow">›</span></button>
+                <div class="faq-a">@f.Answer</div>
+            </div>
+        }
+    </div>
+    <div class="center">
+        <h2>Остались вопросы?</h2>
+        <a class="btn btn-primary" href="mailto:support@vstore.local">Написать нам на почту</a>
+    </div>
+</div>

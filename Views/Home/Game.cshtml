@@ -1,0 +1,117 @@
+@model GameViewModel
+@{
+    var g = Model.Game;
+    ViewData["Title"] = g.Title;
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+}
+
+<h1>@g.Title</h1>
+<div class="game-top">
+    <div class="game-cover" style="background:linear-gradient(135deg,@(g.ColorFrom),@(g.ColorTo))"><span>@g.Title</span></div>
+    <aside class="game-side panel">
+        <p>@g.Description</p>
+        <dl>
+            <dt>Жанр</dt><dd>@g.Genre</dd>
+            <dt>Разработчик</dt><dd>@g.Developer</dd>
+            <dt>Издатель</dt><dd>@g.Publisher</dd>
+            <dt>Дата выхода</dt><dd>@g.ReleaseDate.ToString("dd.MM.yyyy")</dd>
+            <dt>Отзывы</dt><dd>@Model.ReviewSummary (@Model.Reviews.Count)</dd>
+        </dl>
+        <div class="price-row big">
+            @if (g.DiscountPercent > 0)
+            {
+                <span class="badge">-@(g.DiscountPercent)%</span>
+                <s class="muted">@g.Price.Money()</s>
+            }
+            <b>@g.FinalPrice.Money()</b>
+        </div>
+        <div class="btn-row">
+            @if (!Model.IsAuthenticated)
+            {
+                <a class="btn btn-primary" asp-controller="Account" asp-action="Login" asp-route-returnUrl="@returnUrl">Войдите, чтобы купить</a>
+            }
+            else if (Model.InLibrary)
+            {
+                <span class="btn btn-ghost disabled">Уже в библиотеке</span>
+            }
+            else
+            {
+                @if (Model.InCart)
+                {
+                    <a class="btn btn-primary" asp-controller="Cart" asp-action="Index">Перейти в корзину</a>
+                }
+                else
+                {
+                    <form asp-controller="Cart" asp-action="Add" method="post"><input type="hidden" name="gameId" value="@g.Id" /><button class="btn btn-primary">В корзину</button></form>
+                }
+                @if (Model.InWishlist)
+                {
+                    <form asp-controller="Wishlist" asp-action="RemoveByGame" method="post"><input type="hidden" name="gameId" value="@g.Id" /><input type="hidden" name="returnUrl" value="@returnUrl" /><button class="btn btn-ghost">Убрать из желаемого</button></form>
+                }
+                else
+                {
+                    <form asp-controller="Wishlist" asp-action="Add" method="post"><input type="hidden" name="gameId" value="@g.Id" /><input type="hidden" name="returnUrl" value="@returnUrl" /><button class="btn btn-ghost">В желаемое</button></form>
+                }
+            }
+        </div>
+        <div class="age">@g.AgeRating+</div>
+    </aside>
+</div>
+
+<h2>Об игре</h2>
+<div class="panel"><p>@g.Description</p></div>
+
+<h2>Системные требования</h2>
+<div class="req">
+    <div class="panel">
+        <h3>Минимальные</h3>
+        @foreach (var line in g.MinRequirements.Split('|')) { <div class="small">@line</div> }
+    </div>
+    <div class="panel">
+        <h3>Рекомендуемые</h3>
+        @foreach (var line in g.RecRequirements.Split('|')) { <div class="small">@line</div> }
+    </div>
+</div>
+
+<h2>Достижения</h2>
+<div class="ach-strip">
+    @foreach (var a in g.Achievements)
+    {
+        <div class="ach-card">
+            <div class="ach-icon">@a.Icon</div>
+            <b>@a.Title</b>
+            <div class="muted small">@a.Description</div>
+            <div class="muted small">Получили @(a.Percent)%</div>
+        </div>
+    }
+</div>
+
+<h2>Отзывы покупателей</h2>
+<p>Обзоры: <b class="green">@Model.ReviewSummary</b> <span class="muted">(@Model.Reviews.Count)</span></p>
+
+@if (Model.InLibrary)
+{
+    <form class="panel review-form" asp-controller="Home" asp-action="AddReview" method="post">
+        <input type="hidden" name="gameId" value="@g.Id" />
+        <textarea name="text" rows="3" maxlength="2000" placeholder="Напишите отзыв об игре" required></textarea>
+        <div class="btn-row">
+            <label class="radio"><input type="radio" name="positive" value="true" checked /> Рекомендую</label>
+            <label class="radio"><input type="radio" name="positive" value="false" /> Не рекомендую</label>
+            <button class="btn btn-primary btn-sm">Опубликовать</button>
+        </div>
+    </form>
+}
+
+<div class="reviews">
+    @foreach (var r in Model.Reviews)
+    {
+        <div class="review panel">
+            <div class="review-head">
+                <div class="avatar">@r.User.Nickname[0]</div>
+                <div><b>@r.User.Nickname</b><div class="muted small">@r.CreatedAt.ToString("dd.MM.yyyy")</div></div>
+                <span class="verdict @(r.IsPositive ? "pos" : "neg")">@(r.IsPositive ? "Рекомендует" : "Не рекомендует")</span>
+            </div>
+            <p>@r.Text</p>
+        </div>
+    }
+</div>

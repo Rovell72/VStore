@@ -1,0 +1,19 @@
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "Регистрация";
+}
+<div class="auth panel">
+    <h2>Создать аккаунт</h2>
+    <form asp-action="Register" method="post">
+        <div asp-validation-summary="All" class="err"></div>
+        <label>Игровое имя</label>
+        <input asp-for="Nickname" class="input" />
+        <label>Электронная почта</label>
+        <input asp-for="Email" class="input" />
+        <label>Пароль</label>
+        <input asp-for="Password" type="password" class="input" />
+        <label class="check"><input asp-for="AcceptTerms" /> Мне исполнилось 13 лет, и я принимаю условия соглашения подписчика и политику конфиденциальности</label>
+        <button class="btn btn-primary wide">Создать аккаунт</button>
+    </form>
+    <p class="muted small center">Уже есть аккаунт? <a class="green" asp-action="Login">Войти</a></p>
+</div>

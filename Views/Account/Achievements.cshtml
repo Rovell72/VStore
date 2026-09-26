@@ -1,0 +1,22 @@
+@model List<AchievementRow>
+@{
+    ViewData["Title"] = "Достижения";
+}
+<div class="narrow">
+    <h1>Достижения</h1>
+    <p class="muted">Получено достижений: @Model.Count(r => r.Unlocked) из @Model.Count</p>
+    <div class="list">
+        @foreach (var r in Model)
+        {
+            <div class="row ach-row @(r.Unlocked ? "" : "locked")">
+                <div class="ach-icon">@r.Achievement.Icon</div>
+                <div class="grow">
+                    <b>@r.Achievement.Title</b> <span class="muted small">— @r.Achievement.Game.Title</span>
+                    <div class="muted small">@r.Achievement.Description</div>
+                    <div class="bar"><div style="width:@(r.Achievement.Percent)%"></div></div>
+                </div>
+                <div class="muted small">@(r.Achievement.Percent)%</div>
+            </div>
+        }
+    </div>
+</div>

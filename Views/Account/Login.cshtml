@@ -1,0 +1,19 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Вход";
+}
+<div class="auth panel">
+    <h2>Вход</h2>
+    <form asp-action="Login" method="post">
+        <input type="hidden" asp-for="ReturnUrl" />
+        <div asp-validation-summary="All" class="err"></div>
+        <label>Войти с именем аккаунта или почтой</label>
+        <input asp-for="Login" class="input" autocomplete="username" />
+        <label>Пароль</label>
+        <input asp-for="Password" type="password" class="input" autocomplete="current-password" />
+        <label class="check"><input asp-for="RememberMe" /> Запомнить меня</label>
+        <button class="btn btn-primary wide">Войти</button>
+    </form>
+    <p class="muted small center">Нет аккаунта? <a class="green" asp-action="Register">Создать новый</a></p>
+    <p class="muted small center">Демо-аккаунт: demo@vstore.local / Demo123!</p>
+</div>

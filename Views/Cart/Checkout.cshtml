@@ -1,0 +1,33 @@
+@model CheckoutViewModel
+@{
+    ViewData["Title"] = "Оформление заказа";
+}
+<div class="checkout">
+    <div>
+        <h1>Оплата</h1>
+        <form asp-action="Checkout" method="post" class="panel">
+            <div asp-validation-summary="All" class="err"></div>
+            <label class="radio"><input type="radio" name="Method" value="card" checked="@(Model.Method == "card")" /> Банковская карта</label>
+            <label class="radio"><input type="radio" name="Method" value="wallet" checked="@(Model.Method == "wallet")" /> Кошелёк V</label>
+            <div id="card-fields">
+                <label>Номер карты</label>
+                <input asp-for="CardNumber" class="input" placeholder="0000 0000 0000 0000" maxlength="19" inputmode="numeric" />
+                <label>Имя владельца</label>
+                <input asp-for="Holder" class="input" />
+                <div class="two">
+                    <div><label>Срок действия</label><input asp-for="Expiry" class="input" placeholder="ММ/ГГ" maxlength="5" /></div>
+                    <div><label>CVV</label><input asp-for="Cvv" type="password" class="input" maxlength="3" inputmode="numeric" /></div>
+                </div>
+            </div>
+            <button class="btn btn-primary wide">Оплатить @Model.Total.Money()</button>
+        </form>
+    </div>
+    <aside class="panel">
+        <h3>Ваш заказ</h3>
+        @foreach (var i in Model.Items)
+        {
+            <div class="sum-row"><span>@i.Game.Title</span><b>@i.Game.FinalPrice.Money()</b></div>
+        }
+        <div class="sum-row total-row"><span>Итого</span><b>@Model.Total.Money()</b></div>
+    </aside>
+</div>

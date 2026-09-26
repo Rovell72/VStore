@@ -1,0 +1,42 @@
+@model List<WishlistItem>
+@{
+    ViewData["Title"] = "Список желаемого";
+    var inCart = (List<int>)ViewBag.InCart;
+}
+<div class="narrow">
+    <h1>Мой список желаемого</h1>
+    @if (Model.Count == 0)
+    {
+        <p class="muted">Список пуст. <a class="green" asp-controller="Home" asp-action="Index">Перейти в магазин</a></p>
+    }
+    else
+    {
+        <div class="list">
+            @foreach (var w in Model)
+            {
+                <div class="row">
+                    <div class="thumb" style="background:linear-gradient(135deg,@(w.Game.ColorFrom),@(w.Game.ColorTo))"></div>
+                    <div class="grow">
+                        <a asp-controller="Home" asp-action="Game" asp-route-id="@w.GameId"><b>@w.Game.Title</b></a>
+                        <div class="muted small">Добавлено @w.AddedAt.ToString("dd.MM.yyyy")</div>
+                        <div class="btn-row">
+                            <form asp-action="Remove" method="post"><input type="hidden" name="id" value="@w.Id" /><button class="link">Удалить</button></form>
+                        </div>
+                    </div>
+                    <div class="right">
+                        @if (w.Game.DiscountPercent > 0){<span class="badge">-@(w.Game.DiscountPercent)%</span>}
+                        <b>@w.Game.FinalPrice.Money()</b>
+                        @if (inCart.Contains(w.GameId))
+                        {
+                            <a class="btn btn-ghost btn-sm" asp-controller="Cart" asp-action="Index">В корзине</a>
+                        }
+                        else
+                        {
+                            <form asp-action="ToCart" method="post"><input type="hidden" name="id" value="@w.Id" /><button class="btn btn-primary btn-sm">В корзину</button></form>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

@@ -1,0 +1,62 @@
+@inject VStore.Data.AppDbContext Db
+@{
+    var authed = User.Identity?.IsAuthenticated == true;
+    var uid = authed ? int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!) : 0;
+    var cartCount = authed ? await Db.CartItems.CountAsync(c => c.UserId == uid) : 0;
+    var wishCount = authed ? await Db.WishlistItems.CountAsync(w => w.UserId == uid) : 0;
+    var ctrl = ViewContext.RouteData.Values["controller"]?.ToString();
+    var act = ViewContext.RouteData.Values["action"]?.ToString();
+}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@(ViewData["Title"] ?? "V Store")</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+<header class="topbar">
+    <div class="container topbar-in">
+        <a class="logo" asp-controller="Home" asp-action="Index"><span class="logo-v">V</span> STORE</a>
+        <nav class="nav">
+            <a class="@(ctrl == "Home" && act == "Index" ? "active" : "")" asp-controller="Home" asp-action="Index">Обзор</a>
+            <a class="@(act == "Support" ? "active" : "")" asp-controller="Home" asp-action="Support">Поддержка</a>
+            <a class="@(act == "News" ? "active" : "")" asp-controller="Home" asp-action="News">Новости</a>
+        </nav>
+        <form class="search" method="get" asp-controller="Home" asp-action="Index">
+            <input type="text" name="q" placeholder="Поиск игр" value="@Context.Request.Query["q"]" />
+        </form>
+        <div class="actions">
+            <a class="icon-link" asp-controller="Wishlist" asp-action="Index" title="Список желаемого">♡ @if (wishCount > 0){<span class="count">@wishCount</span>}</a>
+            <a class="icon-link" asp-controller="Cart" asp-action="Index" title="Корзина">🛒 @if (cartCount > 0){<span class="count">@cartCount</span>}</a>
+            @if (authed)
+            {
+                <a class="icon-link" asp-controller="Account" asp-action="Profile" title="Профиль">@User.Identity!.Name</a>
+                <form asp-controller="Account" asp-action="Logout" method="post" class="inline"><button class="btn btn-ghost btn-sm">Выйти</button></form>
+            }
+            else
+            {
+                <a class="btn btn-ghost btn-sm" asp-controller="Account" asp-action="Login">Войти</a>
+            }
+            <a class="btn btn-primary btn-sm" href="#">Скачать</a>
+        </div>
+    </div>
+</header>
+
+<main class="container page">
+    @RenderBody()
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <div class="socials"><span>f</span><span>t</span><span>▶</span></div>
+        <p class="muted">© 2026 V Corporation. Все права защищены. Все торговые марки являются собственностью соответствующих владельцев.</p>
+        <div class="foot-links">
+            <a href="#">Условия использования</a><a href="#">Вакансии</a><a href="#">Политика</a><a href="#">Контакты</a><a href="#">Подарочные карты</a>
+        </div>
+    </div>
+</footer>
+<script src="~/js/site.js"></script>
+</body>
+</html>
