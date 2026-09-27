@@ -19,6 +19,10 @@ public static class DbSeeder
         }
         db.Users.AddRange(users);
 
+        var admin = new User { Nickname = "Admin", Email = "admin@vstore.local", Role = "Admin" };
+        admin.PasswordHash = hasher.HashPassword(admin, "Admin123!");
+        db.Users.Add(admin);
+
         const string min = "ОС: Windows 10 64-bit|Процессор: Intel Core i5-4460|Память: 8 ГБ ОЗУ|Видеокарта: GTX 960|Место на диске: 30 ГБ";
         const string rec = "ОС: Windows 11 64-bit|Процессор: Intel Core i7-8700|Память: 16 ГБ ОЗУ|Видеокарта: RTX 2060|Место на диске: 30 ГБ SSD";
 
@@ -107,6 +111,20 @@ public static class DbSeeder
             ("Часто задаваемые вопросы", "Ответы на самые популярные вопросы о платежах, скидках, региональных ценах и подарочных картах собраны в этом разделе.")
         };
         foreach (var (q, a) in faq) db.Faq.Add(new FaqItem { Question = q, Answer = a });
+
+        db.Tickets.Add(new SupportTicket
+        {
+            Name = "Igrok_1", Email = "igrok1@vstore.local", Subject = "Не запускается игра",
+            Message = "После обновления драйверов «Последний рассвет» вылетает на загрузочном экране.",
+            Status = "Открыт", CreatedAt = DateTime.UtcNow.AddHours(-5)
+        });
+        db.Tickets.Add(new SupportTicket
+        {
+            Name = "Igrok_2", Email = "igrok2@vstore.local", Subject = "Вопрос по возврату средств",
+            Message = "Купил игру по ошибке, наиграл 20 минут, можно ли вернуть деньги?",
+            Status = "Отвечено", AdminReply = "Да, оформили возврат, средства поступят в течение 3-5 дней.",
+            CreatedAt = DateTime.UtcNow.AddDays(-2), RepliedAt = DateTime.UtcNow.AddDays(-1)
+        });
 
         db.SaveChanges();
     }

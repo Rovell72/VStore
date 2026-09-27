@@ -1,0 +1,25 @@
+@model List<User>
+@inject ILocalizer Loc
+@{
+    ViewData["Title"] = Loc["admin_users"];
+}
+<h1>@Loc["admin_users"]</h1>
+<div class="list">
+    @foreach (var u in Model)
+    {
+        <div class="row">
+            <div class="avatar">@u.Nickname[0]</div>
+            <div class="grow">
+                <b>@u.Nickname</b> @if (u.Role == "Admin") { <span class="badge">Admin</span> } @if (u.IsBlocked) { <span class="badge badge-red">Заблокирован</span> }
+                <div class="muted small">@u.Email</div>
+            </div>
+            @if (u.Role != "Admin")
+            {
+                <form asp-action="ToggleBlock" method="post">
+                    <input type="hidden" name="id" value="@u.Id" />
+                    <button class="btn btn-ghost btn-sm">@(u.IsBlocked ? Loc["admin_unblock"] : Loc["admin_block"])</button>
+                </form>
+            }
+        </div>
+    }
+</div>

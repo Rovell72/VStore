@@ -1,19 +1,29 @@
 @model RegisterViewModel
+@inject ILocalizer Loc
+@inject IConfiguration Config
 @{
-    ViewData["Title"] = "Регистрация";
+    ViewData["Title"] = Loc["account_register_title"];
+    var googleEnabled = Config["Authentication:Google:Configured"] == "True";
 }
 <div class="auth panel">
-    <h2>Создать аккаунт</h2>
+    <h2>@Loc["account_register_title"]</h2>
     <form asp-action="Register" method="post">
         <div asp-validation-summary="All" class="err"></div>
-        <label>Игровое имя</label>
+        <label>@Loc["account_nickname_label"]</label>
         <input asp-for="Nickname" class="input" />
-        <label>Электронная почта</label>
+        <label>@Loc["account_email_label"]</label>
         <input asp-for="Email" class="input" />
-        <label>Пароль</label>
+        <label>@Loc["account_password_label"]</label>
         <input asp-for="Password" type="password" class="input" />
-        <label class="check"><input asp-for="AcceptTerms" /> Мне исполнилось 13 лет, и я принимаю условия соглашения подписчика и политику конфиденциальности</label>
-        <button class="btn btn-primary wide">Создать аккаунт</button>
+        <label class="check"><input asp-for="AcceptTerms" /> @Loc["account_accept_terms"]</label>
+        <button class="btn btn-primary wide">@Loc["account_register_btn"]</button>
     </form>
-    <p class="muted small center">Уже есть аккаунт? <a class="green" asp-action="Login">Войти</a></p>
+    @if (googleEnabled)
+    {
+        <p class="muted small center">@Loc["account_or"]</p>
+        <a class="btn btn-ghost wide google-btn" asp-action="GoogleLogin">
+            <span class="google-g">G</span> @Loc["account_google"]
+        </a>
+    }
+    <p class="muted small center">@Loc["account_have_account"] <a class="green" asp-action="Login">@Loc["account_login_btn"]</a></p>
 </div>

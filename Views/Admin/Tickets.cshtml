@@ -1,0 +1,34 @@
+@model List<SupportTicket>
+@inject ILocalizer Loc
+@{
+    ViewData["Title"] = Loc["admin_tickets"];
+}
+<h1>@Loc["admin_tickets"]</h1>
+@if (Model.Count == 0)
+{
+    <p class="muted">@Loc["admin_no_tickets"]</p>
+}
+<div class="list">
+    @foreach (var t in Model)
+    {
+        <div class="panel ticket">
+            <div class="review-head">
+                <div><b>@t.Subject</b><div class="muted small">@t.Name · @t.Email · @t.CreatedAt.ToString("dd.MM.yyyy HH:mm")</div></div>
+                <span class="verdict @(t.Status == "Отвечено" ? "pos" : "")">@t.Status</span>
+            </div>
+            <p>@t.Message</p>
+            @if (!string.IsNullOrEmpty(t.AdminReply))
+            {
+                <div class="admin-reply"><b>@Loc["support_reply"]:</b> @t.AdminReply</div>
+            }
+            else
+            {
+                <form asp-action="ReplyTicket" method="post" class="btn-row">
+                    <input type="hidden" name="id" value="@t.Id" />
+                    <textarea name="reply" rows="2" class="input" placeholder="@Loc["admin_reply"]" required></textarea>
+                    <button class="btn btn-primary btn-sm">@Loc["admin_send_reply"]</button>
+                </form>
+            }
+        </div>
+    }
+</div>

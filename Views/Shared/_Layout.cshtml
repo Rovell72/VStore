@@ -1,45 +1,72 @@
 @inject VStore.Data.AppDbContext Db
+@inject ILocalizer Loc
 @{
     var authed = User.Identity?.IsAuthenticated == true;
     var uid = authed ? int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!) : 0;
     var cartCount = authed ? await Db.CartItems.CountAsync(c => c.UserId == uid) : 0;
     var wishCount = authed ? await Db.WishlistItems.CountAsync(w => w.UserId == uid) : 0;
+    var isAdmin = User.IsInRole("Admin");
+    var theme = Context.Request.Cookies["theme"] == "light" ? "light" : "dark";
     var ctrl = ViewContext.RouteData.Values["controller"]?.ToString();
     var act = ViewContext.RouteData.Values["action"]?.ToString();
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
 }
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="@Loc.Lang" class="theme-@theme">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@(ViewData["Title"] ?? "V Store")</title>
     <link rel="stylesheet" href="~/css/site.css" />
 </head>
-<body>
+<body class="theme-@theme">
 <header class="topbar">
     <div class="container topbar-in">
         <a class="logo" asp-controller="Home" asp-action="Index"><span class="logo-v">V</span> STORE</a>
         <nav class="nav">
-            <a class="@(ctrl == "Home" && act == "Index" ? "active" : "")" asp-controller="Home" asp-action="Index">Обзор</a>
-            <a class="@(act == "Support" ? "active" : "")" asp-controller="Home" asp-action="Support">Поддержка</a>
-            <a class="@(act == "News" ? "active" : "")" asp-controller="Home" asp-action="News">Новости</a>
-        </nav>
-        <form class="search" method="get" asp-controller="Home" asp-action="Index">
-            <input type="text" name="q" placeholder="Поиск игр" value="@Context.Request.Query["q"]" />
-        </form>
-        <div class="actions">
-            <a class="icon-link" asp-controller="Wishlist" asp-action="Index" title="Список желаемого">♡ @if (wishCount > 0){<span class="count">@wishCount</span>}</a>
-            <a class="icon-link" asp-controller="Cart" asp-action="Index" title="Корзина">🛒 @if (cartCount > 0){<span class="count">@cartCount</span>}</a>
+            <a class="@(ctrl == "Home" && act == "Index" ? "active" : "")" asp-controller="Home" asp-action="Index">@Loc["nav_store"]</a>
+            <a class="@(act == "Support" ? "active" : "")" asp-controller="Home" asp-action="Support">@Loc["nav_support"]</a>
+            <a class="@(act == "News" ? "active" : "")" asp-controller="Home" asp-action="News">@Loc["nav_news"]</a>
             @if (authed)
             {
-                <a class="icon-link" asp-controller="Account" asp-action="Profile" title="Профиль">@User.Identity!.Name</a>
-                <form asp-controller="Account" asp-action="Logout" method="post" class="inline"><button class="btn btn-ghost btn-sm">Выйти</button></form>
+                <a class="@(ctrl == "Library" ? "active" : "")" asp-controller="Library" asp-action="Index">@Loc["nav_library"]</a>
+            }
+            @if (isAdmin)
+            {
+                <a class="@(ctrl == "Admin" ? "active" : "")" asp-controller="Admin" asp-action="Index">@Loc["nav_admin"]</a>
+            }
+        </nav>
+        <form class="search" method="get" asp-controller="Home" asp-action="Index">
+            <input type="text" name="q" placeholder="@Loc["search_placeholder"]" value="@Context.Request.Query["q"]" />
+        </form>
+        <div class="actions">
+            <a class="icon-link" asp-controller="Wishlist" asp-action="Index" title="@Loc["wishlist"]">♡ @if (wishCount > 0){<span class="count">@wishCount</span>}</a>
+            <a class="icon-link" asp-controller="Cart" asp-action="Index" title="@Loc["cart"]">🛒 @if (cartCount > 0){<span class="count">@cartCount</span>}</a>
+
+            <form asp-controller="Settings" asp-action="SetLanguage" method="post" class="inline lang-form">
+                <input type="hidden" name="returnUrl" value="@returnUrl" />
+                <select name="lang" class="lang-select" onchange="this.form.submit()">
+                    <option value="ru" selected="@(Loc.Lang == "ru")">RU</option>
+                    <option value="uk" selected="@(Loc.Lang == "uk")">UK</option>
+                    <option value="en" selected="@(Loc.Lang == "en")">EN</option>
+                </select>
+            </form>
+            <form asp-controller="Settings" asp-action="SetTheme" method="post" class="inline">
+                <input type="hidden" name="theme" value="@(theme == "dark" ? "light" : "dark")" />
+                <input type="hidden" name="returnUrl" value="@returnUrl" />
+                <button class="btn btn-ghost btn-sm" title="@Loc["theme_toggle"]">@(theme == "dark" ? "☀" : "🌙")</button>
+            </form>
+
+            @if (authed)
+            {
+                <a class="icon-link" asp-controller="Account" asp-action="Profile" title="@Loc["profile"]">@User.Identity!.Name</a>
+                <form asp-controller="Account" asp-action="Logout" method="post" class="inline"><button class="btn btn-ghost btn-sm">@Loc["logout"]</button></form>
             }
             else
             {
-                <a class="btn btn-ghost btn-sm" asp-controller="Account" asp-action="Login">Войти</a>
+                <a class="btn btn-ghost btn-sm" asp-controller="Account" asp-action="Login">@Loc["login"]</a>
             }
-            <a class="btn btn-primary btn-sm" href="#">Скачать</a>
+            <a class="btn btn-primary btn-sm" href="#">@Loc["download"]</a>
         </div>
     </div>
 </header>

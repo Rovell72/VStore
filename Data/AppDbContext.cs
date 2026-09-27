@@ -14,6 +14,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
     public DbSet<NewsItem> News => Set<NewsItem>();
     public DbSet<FaqItem> Faq => Set<FaqItem>();
+    public DbSet<SupportTicket> Tickets => Set<SupportTicket>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -21,6 +22,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         b.Entity<UserAchievement>().HasOne(x => x.Achievement).WithMany().HasForeignKey(x => x.AchievementId).OnDelete(DeleteBehavior.Restrict);
         b.Entity<User>().HasIndex(x => x.Email).IsUnique();
         b.Entity<User>().HasIndex(x => x.Nickname).IsUnique();
+        b.Entity<User>().HasIndex(x => x.GoogleId).IsUnique(false);
         b.Entity<Game>().Property(x => x.Price).HasPrecision(10, 2);
         b.Entity<Order>().Property(x => x.Total).HasPrecision(10, 2);
         b.Entity<OrderItem>().Property(x => x.Price).HasPrecision(10, 2);
