@@ -1,5 +1,8 @@
 @model LoginViewModel
+@inject ILocalizer Loc
+@inject IConfiguration Config
 @{
+<<<<<<< HEAD
     ViewData["Title"] = "Log in";
 }
 
@@ -38,6 +41,33 @@
             <div style="font-size:12px;color:#9aa4ad">Откройте приложение на телефоне или используйте другой браузер, чтобы отсканировать QR-код. После подтверждения этот браузер автоматически выполнит вход.</div>
         </div>
     </div>
+=======
+    ViewData["Title"] = Loc["account_login_title"];
+    var googleEnabled = Config["Authentication:Google:Configured"] == "True";
+}
+<div class="auth panel">
+    <h2>@Loc["account_login_title"]</h2>
+    <form asp-action="Login" method="post">
+        <input type="hidden" asp-for="ReturnUrl" />
+        <div asp-validation-summary="All" class="err"></div>
+        <label>@Loc["account_login_label"]</label>
+        <input asp-for="Login" class="input" autocomplete="username" />
+        <label>@Loc["account_password_label"]</label>
+        <input asp-for="Password" type="password" class="input" autocomplete="current-password" />
+        <label class="check"><input asp-for="RememberMe" /> @Loc["account_remember"]</label>
+        <button class="btn btn-primary wide">@Loc["account_login_btn"]</button>
+    </form>
+    <p class="muted small center"><a class="green" asp-action="ForgotPassword">@Loc["account_forgot"]</a></p>
+    @if (googleEnabled)
+    {
+        <p class="muted small center">@Loc["account_or"]</p>
+        <a class="btn btn-ghost wide google-btn" asp-action="GoogleLogin" asp-route-returnUrl="@Model.ReturnUrl">
+            <span class="google-g">G</span> @Loc["account_google"]
+        </a>
+    }
+    <p class="muted small center">@Loc["account_no_account"] <a class="green" asp-action="Register">@Loc["account_create_new"]</a></p>
+    <p class="muted small center">Демо-аккаунт: demo@vstore.local / Demo123!<br />Админ-аккаунт: admin@vstore.local / Admin123!</p>
+>>>>>>> c6acdd8e622dc712b9f772f32eb3e7b69717a605
 </div>
 
 <script>
