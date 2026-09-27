@@ -1,19 +1,67 @@
 @model LoginViewModel
 @{
-    ViewData["Title"] = "Вход";
+    ViewData["Title"] = "Log in";
 }
-<div class="auth panel">
-    <h2>Вход</h2>
-    <form asp-action="Login" method="post">
-        <input type="hidden" asp-for="ReturnUrl" />
-        <div asp-validation-summary="All" class="err"></div>
-        <label>Войти с именем аккаунта или почтой</label>
-        <input asp-for="Login" class="input" autocomplete="username" />
-        <label>Пароль</label>
-        <input asp-for="Password" type="password" class="input" autocomplete="current-password" />
-        <label class="check"><input asp-for="RememberMe" /> Запомнить меня</label>
-        <button class="btn btn-primary wide">Войти</button>
-    </form>
-    <p class="muted small center">Нет аккаунта? <a class="green" asp-action="Register">Создать новый</a></p>
-    <p class="muted small center">Демо-аккаунт: demo@vstore.local / Demo123!</p>
+
+<div class="login-wrap">
+    <div class="login-left">
+        <h2 style="color:#fff;margin-top:0">Вход</h2>
+        <form asp-action="Login" method="post">
+            <input type="hidden" asp-for="ReturnUrl" />
+            <div asp-validation-summary="All" class="err"></div>
+
+            <div class="login-panel">
+                <label class="login-label">Войти с именем аккаунта или почтой</label>
+                <input asp-for="Login" class="input" autocomplete="username" />
+                <label class="login-label">Пароль</label>
+                <input asp-for="Password" type="password" class="input" autocomplete="current-password" />
+                <label class="check" style="margin-top:8px"><input asp-for="RememberMe" /> Запомнить меня</label>
+
+                <div style="display:flex;gap:12px;margin-top:16px;align-items:center">
+                    <button type="submit" class="btn-sign" style="flex:0 0 220px">ВОЙТИ</button>
+                    <div class="login-help" style="flex:1;text-align:center">Помощь, не могу войти</div>
+                </div>
+
+                <p class="muted small center" style="margin-top:12px">Нет аккаунта? <a class="green" asp-action="Register">Создать новый</a></p>
+                <p class="muted small center">Демо-аккаунт: demo@vstore.local / Demo123!</p>
+            </div>
+        </form>
+    </div>
+
+    <div class="login-right">
+        <div class="qr-card">
+            <div class="qr-title">Войти по QR</div>
+            <div class="qr-wrap" style="margin-bottom:10px;">
+                @{ var scanUrl = Url.Action("QrScan","Account", new { token = Model.QRToken }, Context.Request.Scheme) ?? ""; var qrSrc = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + System.Uri.EscapeDataString(scanUrl); }
+                <img id="qrimg" src="@qrSrc" alt="QR code" />
+            </div>
+            <div style="font-size:12px;color:#9aa4ad">Откройте приложение на телефоне или используйте другой браузер, чтобы отсканировать QR-код. После подтверждения этот браузер автоматически выполнит вход.</div>
+        </div>
+    </div>
 </div>
+
+<script>
+    (function(){
+        var token = '@Model.QRToken';
+        if(!token) return;
+        var pollUrl = '@Url.Action("QrPoll","Account")';
+        var autoUrl = '@Url.Action("QrAutoLogin","Account")';
+        var poll = setInterval(async function(){
+            try{
+                const resp = await fetch(pollUrl + '?token=' + encodeURIComponent(token));
+                const js = await resp.json();
+                if (js && js.authenticated) {
+                    clearInterval(poll);
+                    document.getElementById('qrstatus').textContent = 'Подтверждено, выполняем вход...';
+                    const r2 = await fetch(autoUrl, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'token=' + encodeURIComponent(token) });
+                    const j2 = await r2.json();
+                    if (j2 && j2.ok) {
+                        window.location = j2.redirect || '/';
+                    } else {
+                        document.getElementById('qrstatus').textContent = 'Автоматический вход не удался';
+                    }
+                }
+            } catch(e){ console.warn(e); }
+        },2000);
+    })();
+</script>
