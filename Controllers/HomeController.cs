@@ -75,6 +75,38 @@ public class HomeController(AppDbContext db) : BaseController(db)
     public async Task<IActionResult> News() =>
         View(await Db.News.OrderByDescending(n => n.PublishedAt).ToListAsync());
 
-    public async Task<IActionResult> Support() =>
-        View(await Db.Faq.OrderBy(f => f.Id).ToListAsync());
+    public async Task<IActionResult> Support()
+    {
+        var vm = new SupportPageViewModel { Faq = await Db.Faq.OrderBy(f => f.Id).ToListAsync() };
+        if (CurrentUserId is int uid)
+        {
+            var user = await Db.Users.FindAsync(uid);
+            if (user != null) vm.Ticket = new SupportTicketViewModel { Name = user.Nickname, Email = user.Email };
+        }
+        return View(vm);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> SubmitTicket(SupportTicketViewModel Ticket)
+    {
+        var vm = new SupportPageViewModel { Faq = await Db.Faq.OrderBy(f => f.Id).ToListAsync(), Ticket = Ticket };
+        if (!ModelState.IsValid)
+        {
+            vm.ShowForm = true;
+            return View("Support", vm);
+        }
+
+        Db.Tickets.Add(new SupportTicket
+        {
+            UserId = CurrentUserId,
+            Name = Ticket.Name.Trim(),
+            Email = Ticket.Email.Trim(),
+            Subject = Ticket.Subject.Trim(),
+            Message = Ticket.Message.Trim()
+        });
+        await Db.SaveChangesAsync();
+        vm.TicketSent = true;
+        vm.Ticket = new SupportTicketViewModel();
+        return View("Support", vm);
+    }
 }

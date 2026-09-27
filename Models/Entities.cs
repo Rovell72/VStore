@@ -16,6 +16,11 @@ public class User
     [MaxLength(50)] public string Nickname { get; set; } = "";
     [MaxLength(200)] public string Email { get; set; } = "";
     public string PasswordHash { get; set; } = "";
+    [MaxLength(20)] public string Role { get; set; } = "User";
+    public bool IsBlocked { get; set; }
+    [MaxLength(100)] public string? GoogleId { get; set; }
+    [MaxLength(100)] public string? ResetToken { get; set; }
+    public DateTime? ResetTokenExpiry { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public List<LibraryItem> Library { get; set; } = new();
     public List<UserAchievement> Achievements { get; set; } = new();
@@ -137,4 +142,18 @@ public class FaqItem
     public int Id { get; set; }
     [MaxLength(200)] public string Question { get; set; } = "";
     public string Answer { get; set; } = "";
+}
+
+public class SupportTicket
+{
+    public int Id { get; set; }
+    public int? UserId { get; set; }
+    [MaxLength(100)] public string Name { get; set; } = "";
+    [MaxLength(200)] public string Email { get; set; } = "";
+    [MaxLength(200)] public string Subject { get; set; } = "";
+    [MaxLength(2000)] public string Message { get; set; } = "";
+    [MaxLength(20)] public string Status { get; set; } = "Открыт";
+    public string? AdminReply { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? RepliedAt { get; set; }
 }

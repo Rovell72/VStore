@@ -72,6 +72,67 @@ public class LoginViewModel
     public string? ReturnUrl { get; set; }
 }
 
+public class AdminGameViewModel
+{
+    public int Id { get; set; }
+    [Required(ErrorMessage = "Введите название"), StringLength(200)]
+    public string Title { get; set; } = "";
+    [Required(ErrorMessage = "Введите описание")]
+    public string Description { get; set; } = "";
+    [Required(ErrorMessage = "Введите разработчика"), StringLength(100)]
+    public string Developer { get; set; } = "";
+    [Required(ErrorMessage = "Введите издателя"), StringLength(100)]
+    public string Publisher { get; set; } = "";
+    [Required(ErrorMessage = "Введите жанр"), StringLength(50)]
+    public string Genre { get; set; } = "";
+    [Required(ErrorMessage = "Укажите дату выхода")]
+    public DateTime ReleaseDate { get; set; } = DateTime.UtcNow.Date;
+    [Range(0, 10000, ErrorMessage = "Некорректная цена")]
+    public decimal Price { get; set; }
+    [Range(0, 100, ErrorMessage = "Скидка от 0 до 100%")]
+    public int DiscountPercent { get; set; }
+    [Range(0, 21, ErrorMessage = "Некорректный возрастной рейтинг")]
+    public int AgeRating { get; set; }
+    public string ColorFrom { get; set; } = "#2b5876";
+    public string ColorTo { get; set; } = "#4e4376";
+    public string MinRequirements { get; set; } = "";
+    public string RecRequirements { get; set; } = "";
+    public bool IsFeatured { get; set; }
+}
+
+public class ForgotPasswordViewModel
+{
+    [Required(ErrorMessage = "Введите почту"), EmailAddress(ErrorMessage = "Некорректный адрес почты")]
+    public string Email { get; set; } = "";
+}
+
+public class ResetPasswordViewModel
+{
+    [Required] public string Token { get; set; } = "";
+    [Required(ErrorMessage = "Придумайте пароль"), StringLength(100, MinimumLength = 6, ErrorMessage = "Пароль должен содержать минимум 6 символов")]
+    public string Password { get; set; } = "";
+}
+
+public class SupportPageViewModel
+{
+    public List<FaqItem> Faq { get; set; } = new();
+    public SupportTicketViewModel Ticket { get; set; } = new();
+    public bool ShowForm { get; set; }
+    public bool TicketSent { get; set; }
+}
+
+public class SupportTicketViewModel
+{
+    [Required(ErrorMessage = "Введите имя"), StringLength(100)]
+    public string Name { get; set; } = "";
+    [Required(ErrorMessage = "Введите почту"), EmailAddress(ErrorMessage = "Некорректный адрес почты")]
+    public string Email { get; set; } = "";
+    [Required(ErrorMessage = "Введите тему обращения"), StringLength(200)]
+    public string Subject { get; set; } = "";
+    [Required(ErrorMessage = "Введите сообщение"), StringLength(2000)]
+    public string Message { get; set; } = "";
+}
+
 public class CheckoutViewModel
 {
     public List<CartItem> Items { get; set; } = new();

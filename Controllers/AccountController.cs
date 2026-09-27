@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 
 namespace VStore.Controllers;
@@ -15,21 +16,142 @@ public class AccountController(AppDbContext db, IPasswordHasher<User> hasher) : 
         if (!ModelState.IsValid) return View(m);
         var login = m.Login.Trim();
         var user = await Db.Users.FirstOrDefaultAsync(u => u.Email == login || u.Nickname == login);
-        if (user == null || hasher.VerifyHashedPassword(user, user.PasswordHash, m.Password) == PasswordVerificationResult.Failed)
+        if (user == null || string.IsNullOrEmpty(user.PasswordHash) ||
+            hasher.VerifyHashedPassword(user, user.PasswordHash, m.Password) == PasswordVerificationResult.Failed)
         {
             ModelState.AddModelError("", "Неверное имя аккаунта или пароль");
             return View(m);
         }
+        if (user.IsBlocked)
+        {
+            ModelState.AddModelError("", "Этот аккаунт заблокирован администрацией");
+            return View(m);
+        }
 
+        await SignInUser(user, m.RememberMe);
+        return BackOr(m.ReturnUrl, "Index", "Home");
+    }
+
+    async Task SignInUser(User user, bool remember)
+    {
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new(ClaimTypes.Name, user.Nickname)
+            new(ClaimTypes.Name, user.Nickname),
+            new(ClaimTypes.Role, user.Role)
         };
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity),
-            new AuthenticationProperties { IsPersistent = m.RememberMe });
-        return BackOr(m.ReturnUrl, "Index", "Home");
+            new AuthenticationProperties { IsPersistent = remember });
+    }
+
+    [HttpGet]
+    public IActionResult GoogleLogin(string? returnUrl)
+    {
+        var props = new AuthenticationProperties
+        {
+            RedirectUri = Url.Action(nameof(GoogleResponse), new { returnUrl })
+        };
+        return Challenge(props, GoogleDefaults.AuthenticationScheme);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GoogleResponse(string? returnUrl)
+    {
+        var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        var googleId = result.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+        var email = result.Principal?.FindFirstValue(ClaimTypes.Email);
+        if (!result.Succeeded || googleId == null || email == null)
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            ModelState.AddModelError("", "Не удалось войти через Google");
+            return View("Login", new LoginViewModel { ReturnUrl = returnUrl });
+        }
+
+        var user = await Db.Users.FirstOrDefaultAsync(u => u.GoogleId == googleId || u.Email == email);
+        if (user == null)
+        {
+            var nickname = email.Split('@')[0];
+            var baseNick = nickname;
+            var i = 1;
+            while (await Db.Users.AnyAsync(u => u.Nickname == nickname)) nickname = baseNick + (i++);
+
+            user = new User { Nickname = nickname, Email = email, GoogleId = googleId, PasswordHash = "" };
+            Db.Users.Add(user);
+            await Db.SaveChangesAsync();
+        }
+        else if (user.GoogleId == null)
+        {
+            user.GoogleId = googleId;
+            await Db.SaveChangesAsync();
+        }
+
+        if (user.IsBlocked)
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            ModelState.AddModelError("", "Этот аккаунт заблокирован администрацией");
+            return View("Login", new LoginViewModel { ReturnUrl = returnUrl });
+        }
+
+        await SignInUser(user, true);
+        return BackOr(returnUrl, "Index", "Home");
+    }
+
+    [HttpGet]
+    public IActionResult ForgotPassword() => View();
+
+    [HttpPost]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel m)
+    {
+        if (!ModelState.IsValid) return View(m);
+        var email = m.Email.Trim().ToLowerInvariant();
+        var user = await Db.Users.FirstOrDefaultAsync(u => u.Email == email);
+        if (user == null)
+        {
+            ModelState.AddModelError(nameof(m.Email), "Пользователь с такой почтой не найден");
+            return View(m);
+        }
+
+        user.ResetToken = Guid.NewGuid().ToString("N");
+        user.ResetTokenExpiry = DateTime.UtcNow.AddHours(1);
+        await Db.SaveChangesAsync();
+
+        ViewBag.ResetLink = Url.Action(nameof(ResetPassword), "Account", new { token = user.ResetToken }, Request.Scheme);
+        return View("ForgotPasswordSent");
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ResetPassword(string token)
+    {
+        var valid = await Db.Users.AnyAsync(u => u.ResetToken == token && u.ResetTokenExpiry > DateTime.UtcNow);
+        ViewBag.Valid = valid;
+        ViewBag.Token = token;
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ResetPassword(string token, string password)
+    {
+        var user = await Db.Users.FirstOrDefaultAsync(u => u.ResetToken == token && u.ResetTokenExpiry > DateTime.UtcNow);
+        if (user == null)
+        {
+            ViewBag.Valid = false;
+            ViewBag.Token = token;
+            return View();
+        }
+        if (string.IsNullOrWhiteSpace(password) || password.Length < 6)
+        {
+            ModelState.AddModelError("", "Пароль должен содержать минимум 6 символов");
+            ViewBag.Valid = true;
+            ViewBag.Token = token;
+            return View();
+        }
+
+        user.PasswordHash = hasher.HashPassword(user, password);
+        user.ResetToken = null;
+        user.ResetTokenExpiry = null;
+        await Db.SaveChangesAsync();
+        return View("ResetPasswordDone");
     }
 
     [HttpGet]

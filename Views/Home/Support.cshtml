@@ -1,12 +1,13 @@
-@model List<FaqItem>
+@model SupportPageViewModel
+@inject ILocalizer Loc
 @{
-    ViewData["Title"] = "Поддержка";
+    ViewData["Title"] = Loc["support_title"];
 }
 <div class="narrow">
-    <h1>Поддержка</h1>
-    <input id="faq-search" class="input" type="text" placeholder="Найти помощь" />
+    <h1>@Loc["support_title"]</h1>
+    <input id="faq-search" class="input" type="text" placeholder="@Loc["support_search"]" />
     <div class="faq">
-        @foreach (var f in Model)
+        @foreach (var f in Model.Faq)
         {
             <div class="faq-item">
                 <button type="button" class="faq-q"><span>@f.Question</span><span class="arrow">›</span></button>
@@ -15,7 +16,28 @@
         }
     </div>
     <div class="center">
-        <h2>Остались вопросы?</h2>
-        <a class="btn btn-primary" href="mailto:support@vstore.local">Написать нам на почту</a>
+        <h2>@Loc["support_questions_left"]</h2>
+        <a class="btn btn-ghost" href="mailto:support@vstore.local">@Loc["support_contact_email"]</a>
     </div>
+
+    <h2>@Loc["support_form_title"]</h2>
+    @if (Model.TicketSent)
+    {
+        <p class="panel green">@Loc["support_sent"]</p>
+    }
+    else
+    {
+        <form asp-controller="Home" asp-action="SubmitTicket" method="post" class="panel">
+            <div asp-validation-summary="All" class="err"></div>
+            <label>@Loc["support_name"]</label>
+            <input asp-for="Ticket.Name" class="input" />
+            <label>@Loc["support_email"]</label>
+            <input asp-for="Ticket.Email" class="input" />
+            <label>@Loc["support_subject"]</label>
+            <input asp-for="Ticket.Subject" class="input" />
+            <label>@Loc["support_message"]</label>
+            <textarea asp-for="Ticket.Message" rows="4" class="input"></textarea>
+            <button class="btn btn-primary wide">@Loc["support_send"]</button>
+        </form>
+    }
 </div>
