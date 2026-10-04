@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using System.Collections.Concurrent;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.Google;
 
 namespace VStore.Controllers;
 
@@ -192,7 +192,7 @@ public class AccountController(AppDbContext db, IPasswordHasher<User> hasher) : 
         return RedirectToAction(nameof(Created));
     }
 
-    public IActionResult Created() => View();
+    public new IActionResult Created() => View();
 
     [HttpPost]
     public async Task<IActionResult> Logout()

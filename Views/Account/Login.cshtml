@@ -2,7 +2,6 @@
 @inject ILocalizer Loc
 @inject IConfiguration Config
 @{
-<<<<<<< HEAD
     ViewData["Title"] = "Log in";
 }
 
@@ -41,7 +40,7 @@
             <div style="font-size:12px;color:#9aa4ad">Откройте приложение на телефоне или используйте другой браузер, чтобы отсканировать QR-код. После подтверждения этот браузер автоматически выполнит вход.</div>
         </div>
     </div>
-=======
+@{
     ViewData["Title"] = Loc["account_login_title"];
     var googleEnabled = Config["Authentication:Google:Configured"] == "True";
 }
