@@ -14,7 +14,7 @@
         <div class="panel ticket">
             <div class="review-head">
                 <div><b>@t.Subject</b><div class="muted small">@t.Name · @t.Email · @t.CreatedAt.ToString("dd.MM.yyyy HH:mm")</div></div>
-                <span class="verdict @(t.Status == "Отвечено" ? "pos" : "")">@t.Status</span>
+                <span class="verdict @(t.Status == "Отвечено" ? "pos" : "")">@(t.Status == "Отвечено" ? Loc["ticket_answered"] : Loc["ticket_open"])</span>
             </div>
             <p>@t.Message</p>
             @if (!string.IsNullOrEmpty(t.AdminReply))

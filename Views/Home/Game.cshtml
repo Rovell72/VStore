@@ -1,21 +1,29 @@
 @model GameViewModel
+@inject ILocalizer Loc
+@inject IGameLocalizer GameLoc
 @{
     var g = Model.Game;
-    ViewData["Title"] = g.Title;
+    var reviewPercent = Model.Reviews.Count == 0 ? 0 : Model.PositiveCount * 100 / Model.Reviews.Count;
+    var reviewSummary = Model.Reviews.Count == 0 ? Loc["review_summary_none"]
+        : reviewPercent >= 80 ? Loc["review_summary_very_positive"]
+        : reviewPercent >= 60 ? Loc["review_summary_mostly_positive"]
+        : reviewPercent >= 40 ? Loc["review_summary_mixed"]
+        : Loc["review_summary_mostly_negative"];
+    ViewData["Title"] = GameLoc.Title(g);
     var returnUrl = Context.Request.Path + Context.Request.QueryString;
 }
 
-<h1>@g.Title</h1>
+<h1>@GameLoc.Title(g)</h1>
 <div class="game-top">
-    <div class="game-cover" style="background:linear-gradient(135deg,@(g.ColorFrom),@(g.ColorTo))"><span>@g.Title</span></div>
+    <div class="game-cover" style="background:linear-gradient(135deg,@(g.ColorFrom),@(g.ColorTo))"><span>@GameLoc.Title(g)</span></div>
     <aside class="game-side panel">
-        <p>@g.Description</p>
+        <p>@GameLoc.Description(g)</p>
         <dl>
-            <dt>Жанр</dt><dd>@g.Genre</dd>
-            <dt>Разработчик</dt><dd>@g.Developer</dd>
-            <dt>Издатель</dt><dd>@g.Publisher</dd>
-            <dt>Дата выхода</dt><dd>@g.ReleaseDate.ToString("dd.MM.yyyy")</dd>
-            <dt>Отзывы</dt><dd>@Model.ReviewSummary (@Model.Reviews.Count)</dd>
+            <dt>@Loc["game_genre"]</dt><dd>@GameLoc.Genre(g)</dd>
+            <dt>@Loc["game_developer"]</dt><dd>@GameLoc.Developer(g)</dd>
+            <dt>@Loc["game_publisher"]</dt><dd>@GameLoc.Publisher(g)</dd>
+            <dt>@Loc["game_release_date"]</dt><dd>@g.ReleaseDate.ToString("dd.MM.yyyy")</dd>
+            <dt>@Loc["game_review_count"]</dt><dd>@reviewSummary (@Model.Reviews.Count)</dd>
         </dl>
         <div class="price-row big">
             @if (g.DiscountPercent > 0)
@@ -28,29 +36,29 @@
         <div class="btn-row">
             @if (!Model.IsAuthenticated)
             {
-                <a class="btn btn-primary" asp-controller="Account" asp-action="Login" asp-route-returnUrl="@returnUrl">Войдите, чтобы купить</a>
+                <a class="btn btn-primary" asp-controller="Account" asp-action="Login" asp-route-returnUrl="@returnUrl">@Loc["game_login_to_buy"]</a>
             }
             else if (Model.InLibrary)
             {
-                <span class="btn btn-ghost disabled">Уже в библиотеке</span>
+                <span class="btn btn-ghost disabled">@Loc["game_already_in_library"]</span>
             }
             else
             {
                 @if (Model.InCart)
                 {
-                    <a class="btn btn-primary" asp-controller="Cart" asp-action="Index">Перейти в корзину</a>
+                    <a class="btn btn-primary" asp-controller="Cart" asp-action="Index">@Loc["game_go_to_cart"]</a>
                 }
                 else
                 {
-                    <form asp-controller="Cart" asp-action="Add" method="post"><input type="hidden" name="gameId" value="@g.Id" /><button class="btn btn-primary">В корзину</button></form>
+                    <form asp-controller="Cart" asp-action="Add" method="post"><input type="hidden" name="gameId" value="@g.Id" /><button class="btn btn-primary">@Loc["game_add_to_cart"]</button></form>
                 }
                 @if (Model.InWishlist)
                 {
-                    <form asp-controller="Wishlist" asp-action="RemoveByGame" method="post"><input type="hidden" name="gameId" value="@g.Id" /><input type="hidden" name="returnUrl" value="@returnUrl" /><button class="btn btn-ghost">Убрать из желаемого</button></form>
+                    <form asp-controller="Wishlist" asp-action="RemoveByGame" method="post"><input type="hidden" name="gameId" value="@g.Id" /><input type="hidden" name="returnUrl" value="@returnUrl" /><button class="btn btn-ghost">@Loc["game_remove_wishlist"]</button></form>
                 }
                 else
                 {
-                    <form asp-controller="Wishlist" asp-action="Add" method="post"><input type="hidden" name="gameId" value="@g.Id" /><input type="hidden" name="returnUrl" value="@returnUrl" /><button class="btn btn-ghost">В желаемое</button></form>
+                    <form asp-controller="Wishlist" asp-action="Add" method="post"><input type="hidden" name="gameId" value="@g.Id" /><input type="hidden" name="returnUrl" value="@returnUrl" /><button class="btn btn-ghost">@Loc["game_add_wishlist"]</button></form>
                 }
             }
         </div>
@@ -58,46 +66,46 @@
     </aside>
 </div>
 
-<h2>Об игре</h2>
-<div class="panel"><p>@g.Description</p></div>
+<h2>@Loc["game_about"]</h2>
+<div class="panel"><p>@GameLoc.Description(g)</p></div>
 
-<h2>Системные требования</h2>
+<h2>@Loc["game_reqs"]</h2>
 <div class="req">
     <div class="panel">
-        <h3>Минимальные</h3>
-        @foreach (var line in g.MinRequirements.Split('|')) { <div class="small">@line</div> }
+        <h3>@Loc["game_reqs_min"]</h3>
+        @foreach (var line in g.MinRequirements.Split('|')) { <div class="small">@GameLoc.Requirements(line)</div> }
     </div>
     <div class="panel">
-        <h3>Рекомендуемые</h3>
-        @foreach (var line in g.RecRequirements.Split('|')) { <div class="small">@line</div> }
+        <h3>@Loc["game_reqs_rec"]</h3>
+        @foreach (var line in g.RecRequirements.Split('|')) { <div class="small">@GameLoc.Requirements(line)</div> }
     </div>
 </div>
 
-<h2>Достижения</h2>
+<h2>@Loc["game_achievements"]</h2>
 <div class="ach-strip">
     @foreach (var a in g.Achievements)
     {
         <div class="ach-card">
             <div class="ach-icon">@a.Icon</div>
-            <b>@a.Title</b>
-            <div class="muted small">@a.Description</div>
-            <div class="muted small">Получили @(a.Percent)%</div>
+            <b>@GameLoc.AchievementTitle(a)</b>
+            <div class="muted small">@GameLoc.AchievementDescription(a)</div>
+            <div class="muted small">@Loc["game_achievement_percent"] @(a.Percent)%</div>
         </div>
     }
 </div>
 
-<h2>Отзывы покупателей</h2>
-<p>Обзоры: <b class="green">@Model.ReviewSummary</b> <span class="muted">(@Model.Reviews.Count)</span></p>
+<h2>@Loc["game_reviews"]</h2>
+<p>@Loc["game_review_summary"]: <b class="green">@reviewSummary</b> <span class="muted">(@Model.Reviews.Count)</span></p>
 
 @if (Model.InLibrary)
 {
     <form class="panel review-form" asp-controller="Home" asp-action="AddReview" method="post">
         <input type="hidden" name="gameId" value="@g.Id" />
-        <textarea name="text" rows="3" maxlength="2000" placeholder="Напишите отзыв об игре" required></textarea>
+        <textarea name="text" rows="3" maxlength="2000" placeholder="@Loc["game_review_placeholder"]" required></textarea>
         <div class="btn-row">
-            <label class="radio"><input type="radio" name="positive" value="true" checked /> Рекомендую</label>
-            <label class="radio"><input type="radio" name="positive" value="false" /> Не рекомендую</label>
-            <button class="btn btn-primary btn-sm">Опубликовать</button>
+            <label class="radio"><input type="radio" name="positive" value="true" checked /> @Loc["game_recommend"]</label>
+            <label class="radio"><input type="radio" name="positive" value="false" /> @Loc["game_not_recommend"]</label>
+            <button class="btn btn-primary btn-sm">@Loc["game_publish"]</button>
         </div>
     </form>
 }
@@ -109,7 +117,7 @@
             <div class="review-head">
                 <div class="avatar">@r.User.Nickname[0]</div>
                 <div><b>@r.User.Nickname</b><div class="muted small">@r.CreatedAt.ToString("dd.MM.yyyy")</div></div>
-                <span class="verdict @(r.IsPositive ? "pos" : "neg")">@(r.IsPositive ? "Рекомендует" : "Не рекомендует")</span>
+                <span class="verdict @(r.IsPositive ? "pos" : "neg")">@(r.IsPositive ? Loc["game_recommends"] : Loc["game_does_not_recommend"])</span>
             </div>
             <p>@r.Text</p>
         </div>

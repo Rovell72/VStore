@@ -6,7 +6,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ILocalizer, Localizer>();
-builder.Services.AddControllersWithViews(o => o.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
+builder.Services.AddScoped<IGameLocalizer, GameLocalizer>();
+builder.Services.AddScoped<INewsLocalizer, NewsLocalizer>();
+builder.Services.AddScoped<IFaqLocalizer, FaqLocalizer>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<LocalizedValidationFilter>();
+builder.Services.AddControllersWithViews(o =>
+{
+    o.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+    o.Filters.AddService<LocalizedValidationFilter>();
+});
 builder.Services.AddDbContext<AppDbContext>(o => o.UseSqlServer(
     builder.Configuration.GetConnectionString("Default"),
     sqlOptions => sqlOptions.EnableRetryOnFailure(

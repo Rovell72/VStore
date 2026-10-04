@@ -1,5 +1,6 @@
 @model List<LibraryItem>
 @inject ILocalizer Loc
+@inject IGameLocalizer GameLoc
 @{
     ViewData["Title"] = Loc["library_title"];
     string? q = ViewBag.Query;
@@ -20,8 +21,8 @@
             @foreach (var l in Model)
             {
                 <a class="lib" asp-controller="Home" asp-action="Game" asp-route-id="@l.GameId" style="background:linear-gradient(135deg,@(l.Game.ColorFrom),@(l.Game.ColorTo))">
-                    <b>@l.Game.Title</b>
-                    <span class="small">@Loc["library_hours"]: @l.HoursPlayed.ToString("0.0") ч. · @Loc["library_play"]</span>
+                    <b>@GameLoc.Title(l.Game)</b>
+                    <span class="small">@Loc["library_hours"]: @l.HoursPlayed.ToString("0.0") h · @Loc["library_play"]</span>
                 </a>
             }
         </div>

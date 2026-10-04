@@ -1,13 +1,15 @@
 @model List<CartItem>
+@inject ILocalizer Loc
+@inject IGameLocalizer GameLoc
 @{
-    ViewData["Title"] = "Корзина";
+    ViewData["Title"] = Loc["cart"];
     var total = Model.Sum(i => i.Game.FinalPrice);
 }
 <div class="narrow">
-    <h1>Моя корзина</h1>
+    <h1>@Loc["cart_title_mine"]</h1>
     @if (Model.Count == 0)
     {
-        <p class="muted">Корзина пуста. <a class="green" asp-controller="Home" asp-action="Index">Перейти в магазин</a></p>
+        <p class="muted">@Loc["cart_empty"] <a class="green" asp-controller="Home" asp-action="Index">@Loc["cart_go_store"]</a></p>
     }
     else
     {
@@ -17,11 +19,11 @@
                 <div class="row">
                     <div class="thumb" style="background:linear-gradient(135deg,@(i.Game.ColorFrom),@(i.Game.ColorTo))"></div>
                     <div class="grow">
-                        <a asp-controller="Home" asp-action="Game" asp-route-id="@i.GameId"><b>@i.Game.Title</b></a>
-                        <div class="muted small">@i.Game.Genre</div>
+                        <a asp-controller="Home" asp-action="Game" asp-route-id="@i.GameId"><b>@GameLoc.Title(i.Game)</b></a>
+                        <div class="muted small">@GameLoc.Genre(i.Game)</div>
                         <div class="btn-row">
-                            <form asp-action="Remove" method="post"><input type="hidden" name="id" value="@i.Id" /><button class="link">Удалить</button></form>
-                            <form asp-action="MoveToWishlist" method="post"><input type="hidden" name="id" value="@i.Id" /><button class="link">В желаемое</button></form>
+                            <form asp-action="Remove" method="post"><input type="hidden" name="id" value="@i.Id" /><button class="link">@Loc["cart_remove"]</button></form>
+                            <form asp-action="MoveToWishlist" method="post"><input type="hidden" name="id" value="@i.Id" /><button class="link">@Loc["cart_to_wishlist"]</button></form>
                         </div>
                     </div>
                     <div>
@@ -32,8 +34,8 @@
             }
         </div>
         <div class="total panel">
-            <span>Итого</span><b>@total.Money()</b>
-            <a class="btn btn-primary" asp-action="Checkout">Оформить заказ</a>
+            <span>@Loc["cart_total"]</span><b>@total.Money()</b>
+            <a class="btn btn-primary" asp-action="Checkout">@Loc["cart_checkout"]</a>
         </div>
     }
 </div>

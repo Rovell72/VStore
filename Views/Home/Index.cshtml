@@ -1,22 +1,24 @@
 @model HomeViewModel
+@inject ILocalizer Loc
+@inject IGameLocalizer GameLoc
 @{
-    ViewData["Title"] = "V Store — Обзор";
+    ViewData["Title"] = Loc["footer_news_title"];
 }
 
 <div class="chips">
-    <a class="chip @(string.IsNullOrEmpty(Model.Genre) ? "on" : "")" asp-action="Index">Все</a>
+    <a class="chip @(string.IsNullOrEmpty(Model.Genre) ? "on" : "")" asp-action="Index">@Loc["home_all_genres"]</a>
     @foreach (var g in Model.Genres)
     {
-        <a class="chip @(Model.Genre == g ? "on" : "")" asp-action="Index" asp-route-genre="@g">@g</a>
+        <a class="chip @(Model.Genre == g ? "on" : "")" asp-action="Index" asp-route-genre="@g">@GameLoc.Genre(new Game { Genre = g })</a>
     }
 </div>
 
 @if (Model.IsFiltered)
 {
-    <h2>Результаты поиска</h2>
+    <h2>@Loc["home_search_results"]</h2>
     @if (Model.Results.Count == 0)
     {
-        <p class="muted">Ничего не найдено. Попробуйте изменить запрос.</p>
+        <p class="muted">@Loc["home_nothing_found"]</p>
     }
     else
     {
@@ -27,15 +29,15 @@
 }
 else
 {
-    <h2>Рекомендуемое и популярное</h2>
+    <h2>@Loc["home_title"]</h2>
     @if (Model.Featured.Count > 0)
     {
         var hero = Model.Featured[0];
         <div class="hero-row">
             <a class="hero" asp-action="Game" asp-route-id="@hero.Id" style="background:linear-gradient(135deg,@(hero.ColorFrom),@(hero.ColorTo))">
                 <div class="hero-text">
-                    <h1>@hero.Title</h1>
-                    <p>@hero.Description</p>
+                    <h1>@GameLoc.Title(hero)</h1>
+                    <p>@GameLoc.Description(hero)</p>
                     <div class="price-row">
                         @if (hero.DiscountPercent > 0){<span class="badge">-@(hero.DiscountPercent)%</span>}
                         <b>@hero.FinalPrice.Money()</b>
@@ -46,38 +48,38 @@ else
                 @foreach (var g in Model.Featured.Skip(1))
                 {
                     <a class="mini" asp-action="Game" asp-route-id="@g.Id" style="background:linear-gradient(135deg,@(g.ColorFrom),@(g.ColorTo))">
-                        <b>@g.Title</b><span>@g.FinalPrice.Money()</span>
+                        <b>@GameLoc.Title(g)</b><span>@g.FinalPrice.Money()</span>
                     </a>
                 }
             </div>
         </div>
     }
 
-    <h2>Специальные предложения</h2>
+    <h2>@Loc["home_specials"]</h2>
     <div class="grid">
         @foreach (var g in Model.Specials) { <partial name="_GameCard" model="g" /> }
     </div>
 
-    <h2>Новинки</h2>
+    <h2>@Loc["home_newreleases"]</h2>
     <div class="grid">
         @foreach (var g in Model.NewReleases) { <partial name="_GameCard" model="g" /> }
     </div>
 
     @if (Model.Free.Count > 0)
     {
-        <h2>Бесплатные игры</h2>
+        <h2>@Loc["home_free"]</h2>
         <div class="grid">
             @foreach (var g in Model.Free) { <partial name="_GameCard" model="g" /> }
         </div>
     }
 
-    <h2>Хиты продаж</h2>
+    <h2>@Loc["home_topsellers"]</h2>
     <div class="list">
         @foreach (var g in Model.TopSellers)
         {
             <a class="row" asp-action="Game" asp-route-id="@g.Id">
                 <div class="thumb" style="background:linear-gradient(135deg,@(g.ColorFrom),@(g.ColorTo))"></div>
-                <div class="grow"><b>@g.Title</b><div class="muted small">@g.Genre</div></div>
+                <div class="grow"><b>@GameLoc.Title(g)</b><div class="muted small">@GameLoc.Genre(g)</div></div>
                 <div>@if (g.DiscountPercent > 0){<span class="badge">-@(g.DiscountPercent)%</span>} <b>@g.FinalPrice.Money()</b></div>
             </a>
         }

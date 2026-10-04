@@ -1,13 +1,15 @@
 @model List<WishlistItem>
+@inject ILocalizer Loc
+@inject IGameLocalizer GameLoc
 @{
-    ViewData["Title"] = "Список желаемого";
+    ViewData["Title"] = Loc["wishlist"];
     var inCart = (List<int>)ViewBag.InCart;
 }
 <div class="narrow">
-    <h1>Мой список желаемого</h1>
+    <h1>@Loc["wishlist_title_mine"]</h1>
     @if (Model.Count == 0)
     {
-        <p class="muted">Список пуст. <a class="green" asp-controller="Home" asp-action="Index">Перейти в магазин</a></p>
+        <p class="muted">@Loc["wishlist_empty_text"] <a class="green" asp-controller="Home" asp-action="Index">@Loc["cart_go_store"]</a></p>
     }
     else
     {
@@ -17,10 +19,10 @@
                 <div class="row">
                     <div class="thumb" style="background:linear-gradient(135deg,@(w.Game.ColorFrom),@(w.Game.ColorTo))"></div>
                     <div class="grow">
-                        <a asp-controller="Home" asp-action="Game" asp-route-id="@w.GameId"><b>@w.Game.Title</b></a>
-                        <div class="muted small">Добавлено @w.AddedAt.ToString("dd.MM.yyyy")</div>
+                        <a asp-controller="Home" asp-action="Game" asp-route-id="@w.GameId"><b>@GameLoc.Title(w.Game)</b></a>
+                        <div class="muted small">@Loc["wishlist_added_at"] @w.AddedAt.ToString("dd.MM.yyyy")</div>
                         <div class="btn-row">
-                            <form asp-action="Remove" method="post"><input type="hidden" name="id" value="@w.Id" /><button class="link">Удалить</button></form>
+                            <form asp-action="Remove" method="post"><input type="hidden" name="id" value="@w.Id" /><button class="link">@Loc["cart_remove"]</button></form>
                         </div>
                     </div>
                     <div class="right">
@@ -28,11 +30,11 @@
                         <b>@w.Game.FinalPrice.Money()</b>
                         @if (inCart.Contains(w.GameId))
                         {
-                            <a class="btn btn-ghost btn-sm" asp-controller="Cart" asp-action="Index">В корзине</a>
+                            <a class="btn btn-ghost btn-sm" asp-controller="Cart" asp-action="Index">@Loc["wishlist_in_cart"]</a>
                         }
                         else
                         {
-                            <form asp-action="ToCart" method="post"><input type="hidden" name="id" value="@w.Id" /><button class="btn btn-primary btn-sm">В корзину</button></form>
+                            <form asp-action="ToCart" method="post"><input type="hidden" name="id" value="@w.Id" /><button class="btn btn-primary btn-sm">@Loc["wishlist_to_cart"]</button></form>
                         }
                     </div>
                 </div>

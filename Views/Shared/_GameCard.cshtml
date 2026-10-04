@@ -1,9 +1,10 @@
 @model Game
+@inject IGameLocalizer GameLoc
 <a class="card" asp-controller="Home" asp-action="Game" asp-route-id="@Model.Id">
-    <div class="cover" style="background:linear-gradient(135deg,@(Model.ColorFrom),@(Model.ColorTo))"><span>@Model.Title</span></div>
+    <div class="cover" style="background:linear-gradient(135deg,@(Model.ColorFrom),@(Model.ColorTo))"><span>@GameLoc.Title(Model)</span></div>
     <div class="card-body">
-        <div class="card-title">@Model.Title</div>
-        <div class="muted small">@Model.Genre</div>
+        <div class="card-title">@GameLoc.Title(Model)</div>
+        <div class="muted small">@GameLoc.Genre(Model)</div>
         <div class="price-row">
             @if (Model.DiscountPercent > 0)
             {

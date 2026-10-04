@@ -1,8 +1,9 @@
+@inject ILocalizer Loc
 @{
-    ViewData["Title"] = "Аккаунт создан";
+    ViewData["Title"] = Loc["account_created_title"];
 }
 <div class="auth panel center">
-    <h2>Аккаунт создан!</h2>
-    <p class="muted">Аккаунт был успешно создан.</p>
-    <a class="btn btn-primary wide" asp-action="Login">Войти</a>
+    <h2>@Loc["account_created_title"]</h2>
+    <p class="muted">@Loc["account_created_text"]</p>
+    <a class="btn btn-primary wide" asp-action="Login">@Loc["account_login_btn"]</a>
 </div>

@@ -1,5 +1,6 @@
 @model List<Game>
 @inject ILocalizer Loc
+@inject IGameLocalizer GameLoc
 @{
     ViewData["Title"] = Loc["admin_games"];
 }
@@ -12,10 +13,10 @@
     {
         <div class="row">
             <div class="thumb" style="background:linear-gradient(135deg,@(g.ColorFrom),@(g.ColorTo))"></div>
-            <div class="grow"><b>@g.Title</b><div class="muted small">@g.Genre · @g.FinalPrice.Money()</div></div>
+            <div class="grow"><b>@GameLoc.Title(g)</b><div class="muted small">@GameLoc.Genre(g) · @g.FinalPrice.Money()</div></div>
             <div class="btn-row">
                 <a class="btn btn-ghost btn-sm" asp-action="EditGame" asp-route-id="@g.Id">@Loc["admin_edit"]</a>
-                <form asp-action="DeleteGame" method="post" onsubmit="return confirm('Удалить игру?');">
+                <form asp-action="DeleteGame" method="post" onsubmit="return confirm('@Loc["admin_delete_game_confirm"]');">
                     <input type="hidden" name="id" value="@g.Id" />
                     <button class="btn btn-ghost btn-sm">@Loc["admin_delete"]</button>
                 </form>

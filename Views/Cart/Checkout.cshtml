@@ -1,33 +1,35 @@
 @model CheckoutViewModel
+@inject ILocalizer Loc
+@inject IGameLocalizer GameLoc
 @{
-    ViewData["Title"] = "Оформление заказа";
+    ViewData["Title"] = Loc["checkout_title_full"];
 }
 <div class="checkout">
     <div>
-        <h1>Оплата</h1>
+        <h1>@Loc["checkout_title"]</h1>
         <form asp-action="Checkout" method="post" class="panel">
             <div asp-validation-summary="All" class="err"></div>
-            <label class="radio"><input type="radio" name="Method" value="card" checked="@(Model.Method == "card")" /> Банковская карта</label>
-            <label class="radio"><input type="radio" name="Method" value="wallet" checked="@(Model.Method == "wallet")" /> Кошелёк V</label>
+            <label class="radio"><input type="radio" name="Method" value="card" checked="@(Model.Method == "card")" /> @Loc["checkout_card"]</label>
+            <label class="radio"><input type="radio" name="Method" value="wallet" checked="@(Model.Method == "wallet")" /> @Loc["checkout_wallet"]</label>
             <div id="card-fields">
-                <label>Номер карты</label>
+                <label>@Loc["checkout_card_number"]</label>
                 <input asp-for="CardNumber" class="input" placeholder="0000 0000 0000 0000" maxlength="19" inputmode="numeric" />
-                <label>Имя владельца</label>
+                <label>@Loc["checkout_holder"]</label>
                 <input asp-for="Holder" class="input" />
                 <div class="two">
-                    <div><label>Срок действия</label><input asp-for="Expiry" class="input" placeholder="ММ/ГГ" maxlength="5" /></div>
-                    <div><label>CVV</label><input asp-for="Cvv" type="password" class="input" maxlength="3" inputmode="numeric" /></div>
+                    <div><label>@Loc["checkout_expiry"]</label><input asp-for="Expiry" class="input" placeholder="@Loc["checkout_expiry_format"]" maxlength="5" /></div>
+                    <div><label>@Loc["checkout_cvv"]</label><input asp-for="Cvv" type="password" class="input" maxlength="3" inputmode="numeric" /></div>
                 </div>
             </div>
-            <button class="btn btn-primary wide">Оплатить @Model.Total.Money()</button>
+            <button class="btn btn-primary wide">@Loc["checkout_pay"] @Model.Total.Money()</button>
         </form>
     </div>
     <aside class="panel">
-        <h3>Ваш заказ</h3>
+        <h3>@Loc["checkout_order"]</h3>
         @foreach (var i in Model.Items)
         {
-            <div class="sum-row"><span>@i.Game.Title</span><b>@i.Game.FinalPrice.Money()</b></div>
+            <div class="sum-row"><span>@GameLoc.Title(i.Game)</span><b>@i.Game.FinalPrice.Money()</b></div>
         }
-        <div class="sum-row total-row"><span>Итого</span><b>@Model.Total.Money()</b></div>
+        <div class="sum-row total-row"><span>@Loc["cart_total"]</span><b>@Model.Total.Money()</b></div>
     </aside>
 </div>

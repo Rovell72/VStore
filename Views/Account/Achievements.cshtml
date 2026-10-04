@@ -1,18 +1,20 @@
 @model List<AchievementRow>
+@inject ILocalizer Loc
+@inject IGameLocalizer GameLoc
 @{
-    ViewData["Title"] = "Достижения";
+    ViewData["Title"] = Loc["profile_achievements"];
 }
 <div class="narrow">
-    <h1>Достижения</h1>
-    <p class="muted">Получено достижений: @Model.Count(r => r.Unlocked) из @Model.Count</p>
+    <h1>@Loc["profile_achievements"]</h1>
+    <p class="muted">@Loc["account_achievements_received"]: @Model.Count(r => r.Unlocked) / @Model.Count</p>
     <div class="list">
         @foreach (var r in Model)
         {
             <div class="row ach-row @(r.Unlocked ? "" : "locked")">
                 <div class="ach-icon">@r.Achievement.Icon</div>
                 <div class="grow">
-                    <b>@r.Achievement.Title</b> <span class="muted small">— @r.Achievement.Game.Title</span>
-                    <div class="muted small">@r.Achievement.Description</div>
+                    <b>@GameLoc.AchievementTitle(r.Achievement)</b> <span class="muted small">— @GameLoc.Title(r.Achievement.Game)</span>
+                    <div class="muted small">@GameLoc.AchievementDescription(r.Achievement)</div>
                     <div class="bar"><div style="width:@(r.Achievement.Percent)%"></div></div>
                 </div>
                 <div class="muted small">@(r.Achievement.Percent)%</div>

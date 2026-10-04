@@ -5,10 +5,11 @@ using System.Collections.Concurrent;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Google;
+using VStore.Services;
 
 namespace VStore.Controllers;
 
-public class AccountController(AppDbContext db, IPasswordHasher<User> hasher) : BaseController(db)
+public class AccountController(AppDbContext db, IPasswordHasher<User> hasher, IEmailService emailService, ILocalizer loc) : BaseController(db)
 {
     private class QrTokenEntry
     {
@@ -35,12 +36,12 @@ public class AccountController(AppDbContext db, IPasswordHasher<User> hasher) : 
         if (user == null || string.IsNullOrEmpty(user.PasswordHash) ||
             hasher.VerifyHashedPassword(user, user.PasswordHash, m.Password) == PasswordVerificationResult.Failed)
         {
-            ModelState.AddModelError("", "Неверное имя аккаунта или пароль");
+            ModelState.AddModelError("", loc["login_invalid"]);
             return View(m);
         }
         if (user.IsBlocked)
         {
-            ModelState.AddModelError("", "Этот аккаунт заблокирован администрацией");
+            ModelState.AddModelError("", loc["login_blocked"]);
             return View(m);
         }
 
@@ -80,7 +81,7 @@ public class AccountController(AppDbContext db, IPasswordHasher<User> hasher) : 
         if (!result.Succeeded || googleId == null || email == null)
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            ModelState.AddModelError("", "Не удалось войти через Google");
+            ModelState.AddModelError("", loc["google_login_failed"]);
             return View("Login", new LoginViewModel { ReturnUrl = returnUrl });
         }
 
@@ -105,7 +106,7 @@ public class AccountController(AppDbContext db, IPasswordHasher<User> hasher) : 
         if (user.IsBlocked)
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            ModelState.AddModelError("", "Этот аккаунт заблокирован администрацией");
+            ModelState.AddModelError("", loc["login_blocked"]);
             return View("Login", new LoginViewModel { ReturnUrl = returnUrl });
         }
 
@@ -124,7 +125,7 @@ public class AccountController(AppDbContext db, IPasswordHasher<User> hasher) : 
         var user = await Db.Users.FirstOrDefaultAsync(u => u.Email == email);
         if (user == null)
         {
-            ModelState.AddModelError(nameof(m.Email), "Пользователь с такой почтой не найден");
+            ModelState.AddModelError(nameof(m.Email), loc["forgot_user_not_found"]);
             return View(m);
         }
 
@@ -132,7 +133,33 @@ public class AccountController(AppDbContext db, IPasswordHasher<User> hasher) : 
         user.ResetTokenExpiry = DateTime.UtcNow.AddHours(1);
         await Db.SaveChangesAsync();
 
-        ViewBag.ResetLink = Url.Action(nameof(ResetPassword), "Account", new { token = user.ResetToken }, Request.Scheme);
+        var resetLink = Url.Action(nameof(ResetPassword), "Account", new { token = user.ResetToken }, Request.Scheme);
+        var subject = "Скидання пароля - V Store";
+        var htmlBody = $@"
+<html>
+<body style='font-family: Arial, sans-serif; color: #333;'>
+    <h2>Скидання пароля</h2>
+    <p>Привіт, <strong>{user.Nickname}</strong>!</p>
+    <p>Ви запросили скидання пароля для вашого аккаунта. Натисніть на посилання нижче, щоб створити новий пароль:</p>
+    <p><a href='{resetLink}' style='background-color: #6cc24a; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block;'>Скинути пароль</a></p>
+    <p>Або скопіюйте це посилання в браузер: {resetLink}</p>
+    <p><small>Це посилання дійсне протягом 1 години.</small></p>
+    <p><small>Якщо ви не запросили скидання пароля, проігноруйте цей лист.</small></p>
+    <hr />
+    <p><small>V Store - Магазин ігор</small></p>
+</body>
+</html>";
+
+        try
+        {
+            await emailService.SendAsync(email, subject, htmlBody);
+        }
+        catch (Exception ex)
+        {
+            ModelState.AddModelError("", loc["email_send_failed"]);
+            return View(m);
+        }
+
         return View("ForgotPasswordSent");
     }
 
@@ -157,7 +184,7 @@ public class AccountController(AppDbContext db, IPasswordHasher<User> hasher) : 
         }
         if (string.IsNullOrWhiteSpace(password) || password.Length < 6)
         {
-            ModelState.AddModelError("", "Пароль должен содержать минимум 6 символов");
+            ModelState.AddModelError("", loc["password_too_short"]);
             ViewBag.Valid = true;
             ViewBag.Token = token;
             return View();
@@ -180,9 +207,9 @@ public class AccountController(AppDbContext db, IPasswordHasher<User> hasher) : 
         var email = m.Email.Trim().ToLowerInvariant();
         var nick = m.Nickname.Trim();
         if (await Db.Users.AnyAsync(u => u.Email == email))
-            ModelState.AddModelError(nameof(m.Email), "Пользователь с такой почтой уже существует");
+            ModelState.AddModelError(nameof(m.Email), loc["email_already_used"]);
         if (await Db.Users.AnyAsync(u => u.Nickname == nick))
-            ModelState.AddModelError(nameof(m.Nickname), "Это игровое имя уже занято");
+            ModelState.AddModelError(nameof(m.Nickname), loc["nickname_already_used"]);
         if (!ModelState.IsValid) return View(m);
 
         var user = new User { Nickname = nick, Email = email };
@@ -251,7 +278,7 @@ public class AccountController(AppDbContext db, IPasswordHasher<User> hasher) : 
         var user = await Db.Users.FirstOrDefaultAsync(u => u.Email == login || u.Nickname == login);
         if (user == null || hasher.VerifyHashedPassword(user, user.PasswordHash, m.Password) == PasswordVerificationResult.Failed)
         {
-            ModelState.AddModelError("", "Неверное имя аккаунта или пароль");
+            ModelState.AddModelError("", loc["login_invalid"]);
             return View(m);
         }
         // mark token as authenticated for this user

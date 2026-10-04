@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 namespace VStore.Controllers;
 
 [Authorize]
-public class CartController(AppDbContext db) : BaseController(db)
+public class CartController(AppDbContext db, ILocalizer loc) : BaseController(db)
 {
     public async Task<IActionResult> Index()
     {
@@ -76,10 +76,10 @@ public class CartController(AppDbContext db) : BaseController(db)
         if (m.Method == "card" && m.Total > 0)
         {
             var digits = new string((m.CardNumber ?? "").Where(char.IsDigit).ToArray());
-            if (digits.Length != 16) ModelState.AddModelError(nameof(m.CardNumber), "Введите 16 цифр номера карты");
-            if (string.IsNullOrWhiteSpace(m.Holder)) ModelState.AddModelError(nameof(m.Holder), "Введите имя владельца карты");
-            if (!Regex.IsMatch(m.Expiry ?? "", @"^(0[1-9]|1[0-2])/\d{2}$")) ModelState.AddModelError(nameof(m.Expiry), "Укажите срок действия в формате ММ/ГГ");
-            if (!Regex.IsMatch(m.Cvv ?? "", @"^\d{3}$")) ModelState.AddModelError(nameof(m.Cvv), "Введите 3 цифры CVV");
+            if (digits.Length != 16) ModelState.AddModelError(nameof(m.CardNumber), loc["card_number_invalid"]);
+            if (string.IsNullOrWhiteSpace(m.Holder)) ModelState.AddModelError(nameof(m.Holder), loc["card_holder_required"]);
+            if (!Regex.IsMatch(m.Expiry ?? "", @"^(0[1-9]|1[0-2])/\d{2}$")) ModelState.AddModelError(nameof(m.Expiry), loc["card_expiry_invalid"]);
+            if (!Regex.IsMatch(m.Cvv ?? "", @"^\d{3}$")) ModelState.AddModelError(nameof(m.Cvv), loc["card_cvv_invalid"]);
         }
         if (!ModelState.IsValid) return View(m);
 

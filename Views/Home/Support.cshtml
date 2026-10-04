@@ -1,5 +1,6 @@
 @model SupportPageViewModel
 @inject ILocalizer Loc
+@inject IFaqLocalizer FaqLoc
 @{
     ViewData["Title"] = Loc["support_title"];
 }
@@ -10,8 +11,8 @@
         @foreach (var f in Model.Faq)
         {
             <div class="faq-item">
-                <button type="button" class="faq-q"><span>@f.Question</span><span class="arrow">›</span></button>
-                <div class="faq-a">@f.Answer</div>
+                <button type="button" class="faq-q"><span>@FaqLoc.Question(f)</span><span class="arrow">›</span></button>
+                <div class="faq-a">@FaqLoc.Answer(f)</div>
             </div>
         }
     </div>

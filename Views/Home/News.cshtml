@@ -1,8 +1,10 @@
 @model List<NewsItem>
+@inject ILocalizer Loc
+@inject INewsLocalizer NewsLoc
 @{
-    ViewData["Title"] = "Новости";
+    ViewData["Title"] = Loc["news_title_page"];
 }
-<h1>Актуальные новости</h1>
+<h1>@Loc["news_title_current"]</h1>
 <div class="news">
     @foreach (var n in Model)
     {
@@ -10,8 +12,8 @@
             <div class="news-img" style="background:linear-gradient(135deg,@(n.ColorFrom),@(n.ColorTo))"></div>
             <div>
                 <div class="muted small">@n.PublishedAt.ToString("dd.MM.yyyy")</div>
-                <h3>@n.Title</h3>
-                <p class="muted">@n.Text</p>
+                <h3>@NewsLoc.Title(n)</h3>
+                <p class="muted">@NewsLoc.Text(n)</p>
             </div>
         </article>
     }

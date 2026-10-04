@@ -10,7 +10,7 @@
         <div class="row">
             <div class="avatar">@u.Nickname[0]</div>
             <div class="grow">
-                <b>@u.Nickname</b> @if (u.Role == "Admin") { <span class="badge">Admin</span> } @if (u.IsBlocked) { <span class="badge badge-red">Заблокирован</span> }
+                <b>@u.Nickname</b> @if (u.Role == "Admin") { <span class="badge">Admin</span> } @if (u.IsBlocked) { <span class="badge badge-red">@Loc["admin_blocked"]</span> }
                 <div class="muted small">@u.Email</div>
             </div>
             @if (u.Role != "Admin")

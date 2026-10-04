@@ -6,9 +6,9 @@
 <div class="grid admin-stats">
     <div class="panel stat"><b>@ViewBag.UsersCount</b><span class="muted small">@Loc["admin_users"]</span></div>
     <div class="panel stat"><b>@ViewBag.GamesCount</b><span class="muted small">@Loc["admin_games"]</span></div>
-    <div class="panel stat"><b>@ViewBag.OrdersCount</b><span class="muted small">Заказы</span></div>
+    <div class="panel stat"><b>@ViewBag.OrdersCount</b><span class="muted small">@Loc["admin_orders"]</span></div>
     <div class="panel stat"><b>@ViewBag.OpenTickets</b><span class="muted small">@Loc["admin_tickets"]</span></div>
-    <div class="panel stat"><b>@(((decimal)ViewBag.Revenue).Money())</b><span class="muted small">Выручка</span></div>
+    <div class="panel stat"><b>@(((decimal)ViewBag.Revenue).Money())</b><span class="muted small">@Loc["admin_revenue"]</span></div>
 </div>
 <div class="btn-row" style="margin-top:20px">
     <a class="btn btn-primary" asp-action="Games">@Loc["admin_games"]</a>
