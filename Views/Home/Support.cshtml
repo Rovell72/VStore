@@ -1,8 +1,10 @@
 @model SupportPageViewModel
 @inject ILocalizer Loc
 @inject IFaqLocalizer FaqLoc
+@inject IConfiguration Configuration
 @{
     ViewData["Title"] = Loc["support_title"];
+    var supportEmail = Configuration["Email:FromEmail"];
 }
 <div class="narrow">
     <h1>@Loc["support_title"]</h1>
@@ -18,7 +20,7 @@
     </div>
     <div class="center">
         <h2>@Loc["support_questions_left"]</h2>
-        <a class="btn btn-ghost" href="mailto:support@vstore.local">@Loc["support_contact_email"]</a>
+        <a class="btn btn-ghost" href="mailto:@supportEmail">@Loc["support_contact_email"]</a>
     </div>
 
     <h2>@Loc["support_form_title"]</h2>

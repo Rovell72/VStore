@@ -1,6 +1,6 @@
 namespace VStore.Controllers;
 
-public class HomeController(AppDbContext db) : BaseController(db)
+public class HomeController(AppDbContext db, IEmailService emailService, ILocalizer loc) : BaseController(db)
 {
     public async Task<IActionResult> Index(string? q, string? genre)
     {
@@ -96,13 +96,29 @@ public class HomeController(AppDbContext db) : BaseController(db)
             return View("Support", vm);
         }
 
+        var name = Ticket.Name.Trim();
+        var email = Ticket.Email.Trim();
+        var subject = Ticket.Subject.Trim();
+        var message = Ticket.Message.Trim();
+
+        try
+        {
+            await emailService.SendSupportTicketAsync(Ticket);
+        }
+        catch
+        {
+            ModelState.AddModelError("", loc["email_send_failed"]);
+            vm.ShowForm = true;
+            return View("Support", vm);
+        }
+
         Db.Tickets.Add(new SupportTicket
         {
             UserId = CurrentUserId,
-            Name = Ticket.Name.Trim(),
-            Email = Ticket.Email.Trim(),
-            Subject = Ticket.Subject.Trim(),
-            Message = Ticket.Message.Trim()
+            Name = name,
+            Email = email,
+            Subject = subject,
+            Message = message
         });
         await Db.SaveChangesAsync();
         vm.TicketSent = true;
