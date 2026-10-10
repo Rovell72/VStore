@@ -1,5 +1,5 @@
-:root,.theme-dark{--bg:#1b1f23;--bg2:#252a2f;--panel:#2d3339;--line:#3a4148;--text:#e6e9ec;--muted:#9aa4ad;--green:#6cc24a;--green2:#58a63a;--red:#d9534f;--login-bg:#2b2f35;--body-grad:linear-gradient(180deg,#1b1f23 0,#20281f 100%)}
-.theme-light{--bg:#f4f6f5;--bg2:#ffffff;--panel:#ffffff;--line:#dde2e0;--text:#1c2321;--muted:#5c6a66;--green:#3f9142;--green2:#357a38;--red:#c94b4b;--login-bg:#e8eae7;--body-grad:linear-gradient(180deg,#eef2ef 0,#e7efe6 100%)}
+:root,.theme-dark{--bg:#1b1f23;--bg2:#252a2f;--panel:#2d3339;--line:#3a4148;--text:#e6e9ec;--muted:#9aa4ad;--green:#6cc24a;--green2:#58a63a;--red:#d9534f;--login-bg:#2b2f35;--footer-bg:#14171a;--body-grad:linear-gradient(180deg,#1b1f23 0,#20281f 100%)}
+.theme-light{--bg:#f4f6f5;--bg2:#ffffff;--panel:#ffffff;--line:#dde2e0;--text:#1c2321;--muted:#5c6a66;--green:#3f9142;--green2:#357a38;--red:#c94b4b;--login-bg:#e8eae7;--footer-bg:#ffffff;--body-grad:linear-gradient(180deg,#eef2ef 0,#e7efe6 100%)}
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--body-grad) fixed;color:var(--text);font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;font-size:15px;min-height:100vh;display:flex;flex-direction:column;transition:background .2s,color .2s}
@@ -99,7 +99,7 @@ label{display:block;margin:12px 0 4px;color:var(--muted);font-size:13px}.radio,.
 .faq-q{width:100%;display:flex;justify-content:space-between;background:var(--panel);border:1px solid var(--line);color:var(--text);padding:14px;border-radius:4px;cursor:pointer;font:inherit;text-align:left}
 .faq-a{display:none;background:var(--bg2);padding:14px;border:1px solid var(--line);border-top:0;color:var(--muted)}
 .faq-item.open .faq-a{display:block}.faq-item.open .arrow{transform:rotate(90deg)}
-.footer{background:#14171a;border-top:1px solid var(--line);padding:24px 0;text-align:center}
+.footer{background:var(--footer-bg);border-top:1px solid var(--line);padding:24px 0;text-align:center}
 .socials{display:flex;gap:14px;justify-content:center;margin-bottom:10px}
 .foot-links{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;font-size:13px;color:var(--muted)}
 .lang-select{background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:4px;padding:6px 8px;font:inherit;cursor:pointer}
